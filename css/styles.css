@@ -155,12 +155,13 @@ button{ background:none; border:0; padding:0; cursor:pointer; touch-action:manip
 .nav__link{
   position:relative; display:inline-flex; align-items:center; min-height:44px;
   font:500 .76rem/1 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
-  transition:color var(--t-fast);
+  white-space:nowrap; transition:color var(--t-fast);
 }
 .nav__link::after{ content:""; position:absolute; left:0; right:0; bottom:8px; height:2px; background:var(--naranja); transform:scaleX(0); transform-origin:left; transition:transform var(--t-med); }
 .nav__link:hover, .nav__link.is-active{ color:var(--text); }
 .nav__link:hover::after, .nav__link.is-active::after{ transform:scaleX(1); }
-.header__actions{ display:flex; align-items:center; gap:.6rem; }
+.header__actions{ display:flex; align-items:center; gap:.6rem; flex:none; }
+.header__actions .btn{ white-space:nowrap; }
 .nav-toggle{ width:44px; height:44px; display:grid; place-content:center; gap:7px; border:1.5px solid var(--line-hi); }
 .nav-toggle span{ display:block; width:20px; height:2px; background:var(--text); transition:transform var(--t-fast); }
 .nav-toggle[aria-expanded="true"] span:first-child{ transform:translateY(4.5px) rotate(45deg); }
@@ -188,7 +189,9 @@ button{ background:none; border:0; padding:0; cursor:pointer; touch-action:manip
 .theme-switch__opt:focus-visible{ outline-offset:-4px; outline-color:var(--text); }
 .theme-switch--header .theme-switch__opt span{ display:none; }          /* en el header, solo íconos */
 @media (max-width:559.98px){ .theme-switch--header{ display:none; } }   /* en el celu vive en el menú */
-@media (min-width:1024px){
+/* El menú completo entra recién desde 1200px (logo + 5 links + selector + CTA);
+   más angosto se usa el menú desplegable para que nada se parta en dos líneas. */
+@media (min-width:1200px){
   .nav{ display:block; }
   .nav-toggle, .mobile-menu{ display:none; }
 }

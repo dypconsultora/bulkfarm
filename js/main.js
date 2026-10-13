@@ -154,7 +154,7 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !mobileMenu.hidden) { setMenu(false); navToggle.focus(); }
   });
-  matchMedia("(min-width: 1024px)").addEventListener("change", (e) => { if (e.matches) setMenu(false); });
+  matchMedia("(min-width: 1200px)").addEventListener("change", (e) => { if (e.matches) setMenu(false); });
 
   // Scroll suave de los links internos. Va por JS y no por CSS: con
   // scroll-behavior:smooth en el <html>, ScrollTrigger mide mal al refrescar.
