@@ -350,13 +350,15 @@ button{ background:none; border:0; padding:0; cursor:pointer; touch-action:manip
 .eq__mask{ display:block; overflow:hidden; padding-top:.14em; margin-top:-.14em; }
 .eq__big{ display:block; font:400 clamp(3.4rem,17vw,6rem)/.95 var(--font-display); text-transform:uppercase; white-space:nowrap; }
 .eq__cap{ font:500 .7rem/1.3 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
-.eq__op{ display:flex; align-items:center; height:.95em; font-size:clamp(2.6rem,12vw,4rem); color:var(--naranja); }
+.eq__op{ display:flex; align-items:center; align-self:flex-start; height:.95em; font-size:clamp(2.6rem,12vw,4rem); color:var(--naranja); }
 .eq__op svg{ width:.5em; height:.5em; }
 .eq__term--total .eq__big{ color:var(--naranja); }
 .eq__rule{ display:block; height:4px; background:var(--naranja); transform-origin:left; }
+.eq__br{ display:none; } /* corta la ecuación en dos renglones cuando va en fila */
 @media (min-width:760px){
   .eq{ flex-direction:row; flex-wrap:wrap; align-items:flex-start; gap:clamp(.6rem,1.6vw,1.6rem); margin-bottom:var(--sp-6); }
   .eq__term{ width:min-content; } /* el epígrafe se ajusta al ancho de la palabra */
+  .eq__br{ display:block; flex-basis:100%; height:0; }
   .eq__big, .eq__op{ font-size:clamp(2.6rem,5.6vw,5rem); }
 }
 .incl{ border-top:1px solid var(--line); }
@@ -379,7 +381,8 @@ button{ background:none; border:0; padding:0; cursor:pointer; touch-action:manip
 .quote__fields{ min-width:0; }
 @media (min-width:1024px){
   .quote{ grid-template-columns:minmax(0,1fr) minmax(330px,410px); }
-  .ticket{ position:sticky; top:calc(var(--header-h) + 1rem); }
+  /* si el ticket no entra en pantallas bajas, scrollea adentro y el botón sigue a mano */
+  .ticket{ position:sticky; top:calc(var(--header-h) + 1rem); max-height:calc(100dvh - var(--header-h) - 2rem); overflow-y:auto; }
 }
 .fs{ min-width:0; margin:0; border:0; padding:clamp(1.75rem,3vw,2.6rem) 0 0; }
 .fs + .fs{ margin-top:clamp(1.75rem,3vw,2.6rem); border-top:1px solid var(--line); }
@@ -419,6 +422,13 @@ button{ background:none; border:0; padding:0; cursor:pointer; touch-action:manip
 input[type="number"]{ -moz-appearance:textfield; appearance:textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
 .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+
+/* Filamento: marca (desplegable) y gramos. El aire va adentro para que la
+   animación de altura arranque limpia desde cero. */
+.fila__in{ padding-top:1.5rem; }
+.select{ position:relative; }
+.select select{ -webkit-appearance:none; appearance:none; padding-right:3rem; cursor:pointer; }
+.select__chev{ position:absolute; right:1rem; top:50%; width:18px; height:18px; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
 
 /* Selector de impresora */
 .pick{ display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); }
@@ -497,21 +507,23 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 
 /* Ticket (resumen) */
 .ticket__paper{
-  position:relative; padding:1.5rem 1.5rem 2.6rem; background:var(--inv-bg); color:var(--inv-text);
+  position:relative; padding:1.25rem 1.5rem 2.4rem; background:var(--inv-bg); color:var(--inv-text);
   --ctx-bg:var(--inv-bg); --text:var(--inv-text); --muted:var(--inv-muted); --line:var(--inv-line-hi);
   --accent-small:var(--inv-accent-small); --err:var(--inv-err);
 }
-.ticket__head{ display:flex; justify-content:space-between; gap:1rem; padding-bottom:1rem; border-bottom:1.5px solid var(--text); font:700 .7rem/1.2 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; }
+.ticket__head{ display:flex; justify-content:space-between; gap:1rem; padding-bottom:.8rem; border-bottom:1.5px solid var(--text); font:700 .7rem/1.2 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; }
 .ticket__head span:last-child{ color:var(--muted); font-weight:500; text-align:right; }
-.ticket__rows{ padding-block:.5rem; border-bottom:1.5px dashed var(--text); }
-.ticket__rows div{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; padding:.42rem 0; }
+.ticket__rows{ padding-block:.4rem; border-bottom:1.5px dashed var(--text); }
+.ticket__rows div{ display:flex; justify-content:space-between; align-items:baseline; gap:1rem; padding:.3rem 0; }
 .ticket__rows dt{ font:500 .72rem/1.2 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
 .ticket__rows dd{ font:700 .88rem/1.3 var(--font-mono); text-align:right; font-variant-numeric:tabular-nums; }
-.ticket__total{ display:grid; gap:.35rem; padding-block:1.2rem 1rem; }
+.ticket__rows--costs{ border-bottom:1.5px solid var(--text); }
+.ticket__rows--costs dd{ font-size:.95rem; }
+.ticket__total{ display:grid; gap:.3rem; padding-block:1rem .8rem; }
 .ticket__label{ font:700 .72rem/1 var(--font-mono); letter-spacing:.14em; text-transform:uppercase; }
-.ticket__amount{ font:400 clamp(2.8rem,5vw,3.6rem)/1 var(--font-display); font-variant-numeric:tabular-nums; letter-spacing:.01em; }
+.ticket__amount{ font:400 clamp(2.8rem,5vw,3.4rem)/1 var(--font-display); font-variant-numeric:tabular-nums; letter-spacing:.01em; }
 .ticket__sub{ font-size:.86rem; line-height:1.4; color:var(--muted); min-height:2.4em; }
-.ticket__incl{ display:flex; align-items:center; gap:.5rem; margin-bottom:1.1rem; font:700 .74rem/1 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--accent-small); }
+.ticket__incl{ display:flex; align-items:center; gap:.5rem; margin-bottom:.9rem; font:700 .74rem/1.3 var(--font-mono); letter-spacing:.1em; text-transform:uppercase; color:var(--accent-small); }
 .ticket__incl svg{ width:16px; height:16px; flex:none; }
 .ticket__status{ margin-bottom:1rem; padding:.9rem 1rem; border:1.5px solid var(--text); font-size:.92rem; line-height:1.45; }
 .ticket__status.is-error{ border-color:var(--err); color:var(--err); }
@@ -520,7 +532,7 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .ticket__submit{ overflow:hidden; }
 .ticket__submit-bar{ position:absolute; inset:auto 0 0 0; height:5px; background:var(--naranja); transform:scaleX(0); transform-origin:left; }
 .ticket__submit.is-sending{ background:var(--text); border-color:var(--text); color:var(--ctx-bg); }
-.ticket__note{ margin-top:.9rem; font-size:.8rem; line-height:1.45; color:var(--muted); }
+.ticket__note{ margin-top:.75rem; font-size:.8rem; line-height:1.45; color:var(--muted); }
 .ticket__layers{
   position:absolute; inset:auto 1.5rem 1rem 1.5rem; height:10px; opacity:.85;
   background:repeating-linear-gradient(90deg,var(--text) 0 2px,transparent 2px 5px,var(--text) 5px 6px,transparent 6px 11px,var(--text) 11px 14px,transparent 14px 17px);

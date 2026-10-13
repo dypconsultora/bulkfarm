@@ -4,8 +4,9 @@
    el destino del formulario. El resto del sitio lee de este archivo.
    ===================================================================== */
 window.BPF_CONFIG = {
-  /* Las tarifas de abajo son DE EJEMPLO. Cuando cargues las reales,
-     pasá esto a false y desaparece el aviso "precios de ejemplo". */
+  /* Las tarifas por hora y los precios del filamento de abajo son DE EJEMPLO.
+     Cuando cargues los reales, pasá esto a false y desaparece el aviso
+     "precios de ejemplo". */
   PRICES_ARE_PLACEHOLDER: true,
 
   CURRENCY: "ARS",
@@ -19,6 +20,7 @@ window.BPF_CONFIG = {
   MAX_FILES: 5,           // archivos por pedido
   MAX_FILE_MB: 100,       // peso máximo por archivo
   ACCEPT: [".stl", ".3mf"],
+  MAX_GRAMS: 20000,       // tope de gramos de filamento por máquina que acepta el formulario
 
   CONTACT: {
     whatsapp: "5491155512480",            // sin + ni espacios (formato wa.me)
@@ -27,8 +29,20 @@ window.BPF_CONFIG = {
     instagram: "bulk3dstudio"
   },
 
+  /* Filamento: lo ponemos nosotros y se cobra aparte, por gramo.
+     El cliente elige la marca cuando selecciona un material y carga los gramos.
+     pricePerKg = precio por kilo. Si cambia según el material, en vez de un
+     número se puede poner un objeto: { PLA: 18000, PETG: 21000, default: 24000 } */
+  FILAMENT_BRANDS: [
+    { id: "marca-1", name: "Marca 1", pricePerKg: 18000 },
+    { id: "marca-2", name: "Marca 2", pricePerKg: 22000 },
+    { id: "marca-3", name: "Marca 3", pricePerKg: 26000 },
+    { id: "marca-4", name: "Marca 4", pricePerKg: 30000 },
+    { id: "marca-5", name: "Marca 5", pricePerKg: 34000 }
+  ],
+
   /* Orden = orden en que se muestran. pricePerHour = tarifa por hora y por
-     máquina, filamento incluido. materials = lo que se puede pedir en ese
+     máquina (el filamento va aparte). materials = lo que se puede pedir en ese
      modelo (el resto aparece deshabilitado en el formulario). */
   PRINTERS: [
     {

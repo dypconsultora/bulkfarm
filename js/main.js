@@ -58,7 +58,7 @@
         <div class="pcard__foot">
           <p class="pcard__price">
             <span class="pcard__amount">${fmt(p.pricePerHour)}</span>
-            <span class="pcard__unit">por hora · filamento incluido</span>
+            <span class="pcard__unit">por hora · filamento aparte</span>
           </p>
           <button type="button" class="btn btn--solid pcard__btn" data-choose="${p.id}" aria-pressed="false"><span>Elegir</span>${ICON.arrow}</button>
         </div>
@@ -206,11 +206,12 @@
      3. Cotizador
   ------------------------------------------------------------------ */
   const form = $("#quoteForm");
-  const state = { printer: null, units: 1, hours: null, material: CFG.MATERIALS[0], files: [] };
+  const state = { printer: null, units: 1, hours: null, material: CFG.MATERIALS[0], brand: null, grams: null, files: [] };
 
   const tk = {
     printer: $("#tkPrinter"), rate: $("#tkRate"), units: $("#tkUnits"), hours: $("#tkHours"),
-    material: $("#tkMaterial"), files: $("#tkFiles"),
+    material: $("#tkMaterial"), brand: $("#tkBrand"), files: $("#tkFiles"),
+    print: $("#tkPrint"), filament: $("#tkFilament"),
     label: $("#tkLabel"), amount: $("#tkAmount"), sub: $("#tkSub"), live: $("#ticketLive")
   };
 
@@ -235,27 +236,51 @@
     gsap.to(amount, { v: target, duration: 0.55, ease: "power3.out", overwrite: true, onUpdate: () => { tk.amount.textContent = fmt(amount.v); } });
   };
 
+  /* --- Costos: impresión (horas de máquina) + filamento (gramos) --- */
+  const brandPrice = (brand, material) => {
+    const price = brand && brand.pricePerKg;
+    if (typeof price === "number") return price;
+    if (price && typeof price === "object") return price[material] != null ? price[material] : (price.default != null ? price.default : null);
+    return null;
+  };
+  // Cada parte queda en null mientras falte algún dato para calcularla
+  function costs() {
+    const p = state.printer;
+    const perHour = p ? p.pricePerHour * state.units : null;
+    const print = p && state.hours ? perHour * state.hours : null;
+    const perKg = brandPrice(state.brand, state.material);
+    const filament = state.grams && perKg != null ? (state.grams * state.units * perKg) / 1000 : null;
+    return { perHour, print, perKg, filament };
+  }
+
   function updateTicket() {
     const p = state.printer;
+    const c = costs();
     setRow(tk.printer, p ? p.model : "—");
     setRow(tk.rate, p ? fmt(p.pricePerHour) + "/h" : "—");
     setRow(tk.units, "× " + state.units);
     setRow(tk.hours, state.hours ? decimal.format(state.hours) + " h" : "A confirmar");
     setRow(tk.material, state.material);
+    setRow(tk.brand, state.brand ? state.brand.name + (state.grams ? " · " + integer.format(state.grams) + " g c/u" : "") : "A definir");
     setRow(tk.files, String(state.files.length));
+    setRow(tk.print, c.print != null ? fmt(c.print) : "A confirmar");
+    setRow(tk.filament, c.filament != null ? fmt(c.filament) : "A confirmar");
 
     let target = null;
     let label = "Por hora";
     let sub = "Elegí una impresora para ver la tarifa.";
     if (p) {
-      const perHour = p.pricePerHour * state.units;
-      if (state.hours) {
-        target = perHour * state.hours;
+      if (c.print != null && c.filament != null) {
+        target = c.print + c.filament;
         label = "Total estimado";
-        sub = `${fmt(perHour)}/h × ${decimal.format(state.hours)} h. Se confirma al revisar tu archivo.`;
+        sub = "Impresión + filamento. Se confirma al revisar tu archivo.";
+      } else if (c.print != null) {
+        target = c.print;
+        label = "Impresión estimada";
+        sub = "Falta sumar el filamento, que se cobra aparte. Elegí marca y gramos para verlo.";
       } else {
-        target = perHour;
-        sub = `${state.units} × ${fmt(p.pricePerHour)}/h. El total depende de las horas de impresión.`;
+        target = c.perHour;
+        sub = `${state.units} × ${fmt(p.pricePerHour)}/h. El total depende de las horas y del filamento.`;
       }
     }
     tk.label.textContent = label;
@@ -265,7 +290,7 @@
   }
 
   /* --- Errores por campo --- */
-  const ERR_TARGET = { printer: null, units: "#units", hours: "#hours", files: "#files", name: "#name", email: "#email", phone: "#phone" };
+  const ERR_TARGET = { printer: null, units: "#units", hours: "#hours", grams: "#grams", files: "#files", name: "#name", email: "#email", phone: "#phone" };
   function setError(key, msg) {
     const box = $("#err-" + key);
     if (box) box.textContent = msg || "";
@@ -288,6 +313,7 @@
         state.material = first.value;
       }
     });
+    syncFilament();
   }
 
   function selectPrinter(id) {
@@ -321,6 +347,7 @@
     if (e.target.name !== "material") return;
     state.material = e.target.value;
     pulse(e.target.parentNode);
+    syncFilament();
     updateTicket();
   });
 
@@ -360,6 +387,86 @@
     return true;
   };
   hoursInput.addEventListener("input", () => { readHours(); updateTicket(); });
+
+  /* --- Filamento: marca y gramos. La marca aparece al elegir un material
+         y los gramos al elegir la marca. Los dos son opcionales. --- */
+  const filamentBox = $("#filamentBox");
+  const brandSelect = $("#brand");
+  const gramsField = $("#gramsField");
+  const gramsInput = $("#grams");
+  const BRANDS = CFG.FILAMENT_BRANDS || [];
+  const MAX_GRAMS = CFG.MAX_GRAMS || 20000;
+
+  // Muestra u oculta un bloque animando su altura (sin GSAP aparece directo)
+  function reveal(el, show) {
+    if ((el._shown === undefined ? !el.hidden : el._shown) === show) return;
+    el._shown = show;
+    if (!MOTION) { el.hidden = !show; return; }
+    gsap.killTweensOf(el);
+    const done = () => {
+      gsap.set(el, { clearProps: "height,opacity,overflow" });
+      if (!show) el.hidden = true;
+      ScrollTrigger.refresh();
+    };
+    if (show) {
+      el.hidden = false;
+      gsap.fromTo(el, { height: 0, opacity: 0, overflow: "hidden" }, { height: "auto", opacity: 1, duration: 0.45, ease: "power3.out", onComplete: done });
+    } else {
+      gsap.to(el, { height: 0, opacity: 0, overflow: "hidden", duration: 0.25, ease: "power2.in", onComplete: done });
+    }
+  }
+
+  function renderBrands() {
+    const keep = brandSelect.value;
+    brandSelect.textContent = "";
+    const first = document.createElement("option");
+    first.value = "";
+    first.textContent = "Elegí la marca";
+    brandSelect.appendChild(first);
+    BRANDS.forEach((brand) => {
+      const perKg = brandPrice(brand, state.material); // puede depender del material
+      const option = document.createElement("option");
+      option.value = brand.id;
+      option.textContent = brand.name + (perKg != null ? " — " + fmt(perKg) + "/kg" : "");
+      brandSelect.appendChild(option);
+    });
+    brandSelect.value = keep;
+  }
+
+  const readGrams = () => {
+    const raw = gramsInput.value.trim();
+    if (raw === "" || !state.brand) { state.grams = null; setError("grams", ""); return true; }
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n <= 0 || n > MAX_GRAMS) {
+      state.grams = null;
+      setError("grams", `Poné los gramos como un número entre 1 y ${integer.format(MAX_GRAMS)} (por ejemplo 350), o dejalo vacío.`);
+      return false;
+    }
+    state.grams = n;
+    setError("grams", "");
+    return true;
+  };
+
+  // Deja el bloque de filamento acorde al material y la marca elegidos
+  function syncFilament() {
+    const hasMaterial = state.material !== CFG.MATERIALS[0];
+    if (hasMaterial) renderBrands();
+    else { brandSelect.value = ""; state.brand = null; }
+    if (!state.brand) { gramsInput.value = ""; state.grams = null; setError("grams", ""); }
+    reveal(filamentBox, hasMaterial);
+    // si el bloque todavía se está abriendo, se termina ya: si no, recorta el campo de gramos
+    if (state.brand && MOTION) gsap.getTweensOf(filamentBox).forEach((tween) => tween.progress(1));
+    reveal(gramsField, !!state.brand);
+  }
+
+  brandSelect.addEventListener("change", () => {
+    state.brand = BRANDS.find((brand) => brand.id === brandSelect.value) || null;
+    syncFilament();
+    updateTicket();
+  });
+  gramsInput.addEventListener("input", () => { readGrams(); updateTicket(); });
+  gramsInput.max = MAX_GRAMS;
+  renderBrands();
 
   /* --- Archivos --- */
   const dropzone = $("#dropzone");
@@ -464,6 +571,7 @@
     const fail = (key, msg, el) => { setError(key, msg); if (msg && !first) first = el; };
     fail("printer", state.printer ? "" : "Elegí una impresora para continuar.", $('input[name="printer"]'));
     if (!readHours()) first = first || hoursInput;
+    if (!readGrams()) first = first || gramsInput;
     fail("files", state.files.length ? "" : "Subí al menos un archivo .STL o .3MF.", fileInput);
     Object.keys(VALIDATORS).forEach((key) => { const input = $("#" + key); fail(key, VALIDATORS[key](input.value), input); });
     return first;
@@ -482,6 +590,7 @@
     lines.push(`• Máquinas: ${state.units}`);
     lines.push(`• Horas estimadas por máquina: ${state.hours ? decimal.format(state.hours) + " h" : "a confirmar"}`);
     lines.push(`• Material: ${state.material}`);
+    if (state.brand) lines.push(`• Filamento: ${state.brand.name}, ${state.grams ? integer.format(state.grams) + " g por máquina" : "gramos a confirmar"}`);
     if (state.files.length) lines.push(`• Archivos: ${state.files.map((x) => x.file.name).join(", ")}`);
     lines.push("Te adjunto el archivo por acá.");
     return lines.join("\n");
@@ -519,7 +628,7 @@
 
   function buildPayload() {
     const p = state.printer;
-    const perHour = p.pricePerHour * state.units;
+    const c = costs();
     const fd = new FormData();
     fd.append("subject", `Pedido de horas — ${p.model} × ${state.units}`);
     fd.append("printer_id", p.id);
@@ -528,8 +637,13 @@
     fd.append("units", state.units);
     fd.append("hours_per_unit", state.hours == null ? "" : state.hours);
     fd.append("material", state.material);
-    fd.append("rate_per_hour_total", perHour);
-    fd.append("estimate_total", state.hours ? perHour * state.hours : "");
+    fd.append("filament_brand", state.brand ? state.brand.name : "");
+    fd.append("filament_price_per_kg", state.brand && c.perKg != null ? c.perKg : "");
+    fd.append("filament_grams_per_unit", state.grams == null ? "" : state.grams);
+    fd.append("rate_per_hour_total", c.perHour);
+    fd.append("print_total", c.print == null ? "" : c.print);
+    fd.append("filament_total", c.filament == null ? "" : c.filament);
+    fd.append("estimate_total", c.print != null && c.filament != null ? c.print + c.filament : "");
     fd.append("currency", CFG.CURRENCY);
     ["name", "email", "phone", "notes"].forEach((key) => fd.append(key, $("#" + key).value.trim()));
     state.files.forEach((entry) => fd.append("files[]", entry.file, entry.file.name));
@@ -568,7 +682,7 @@
 
   function resetForm() {
     form.reset();
-    state.printer = null; state.units = 1; state.hours = null; state.material = CFG.MATERIALS[0]; state.files = [];
+    state.printer = null; state.units = 1; state.hours = null; state.material = CFG.MATERIALS[0]; state.brand = null; state.grams = null; state.files = [];
     $$(".pcard").forEach((card) => {
       card.classList.remove("is-chosen");
       const btn = $(".pcard__btn", card);
