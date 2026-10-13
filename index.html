@@ -174,7 +174,7 @@
           <span class="step__bar"><i class="step__fill"></i></span>
           <span class="step__n">03</span>
           <h3 class="step__title">Subís tu archivo</h3>
-          <p class="step__text">.STL o .3MF, desde el formulario. Llega directo a nuestro equipo.</p>
+          <p class="step__text">.STL o .3MF, desde el formulario o con el link de una carpeta de Google Drive.</p>
         </li>
         <li class="step">
           <span class="step__bar"><i class="step__fill"></i></span>
@@ -337,6 +337,20 @@
             <p class="field__help" id="help-files"></p>
             <ul class="files" id="fileList"></ul>
             <p class="field__error" id="err-files" role="alert"></p>
+
+            <!-- Alternativa a subir el archivo: link a una carpeta de Google Drive -->
+            <div class="drive">
+              <p class="drive__or" aria-hidden="true"><span>o</span></p>
+              <div class="field">
+                <label class="field__label" for="driveUrl">Cargá desde Google Drive</label>
+                <div class="prefix">
+                  <svg class="prefix__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true"><path d="M3 6h7l2 2.5h9V19H3z"/><path d="M9.5 14h5M12.5 11.5 15 14l-2.5 2.5"/></svg>
+                  <input class="input" id="driveUrl" name="drive_url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://drive.google.com/drive/folders/…" aria-describedby="help-drive err-drive">
+                </div>
+                <p class="field__help" id="help-drive">Pegá el link de la carpeta con tus archivos. Tiene que estar compartida como «Cualquier persona con el enlace» para que podamos descargarla.</p>
+                <p class="field__error" id="err-drive" role="alert"></p>
+              </div>
+            </div>
           </fieldset>
 
           <fieldset class="fs">
@@ -421,7 +435,7 @@
           <rect x="3" y="3" width="58" height="58"/><path class="sent__check" d="M18 33l10 10 19-21"/>
         </svg>
         <h3 class="display display--sm">Pedido <em class="serif">recibido</em></h3>
-        <p class="lead" id="sentText">Ya tenemos tu archivo. Lo revisamos y te escribimos con las horas y el total.</p>
+        <p class="lead" id="sentText">Ya tenemos tu pedido. Revisamos los archivos y te escribimos con las horas y el total.</p>
         <button type="button" class="btn btn--ghost" id="sentReset">Hacer otro pedido</button>
       </div>
     </div>
@@ -446,7 +460,7 @@
         </details>
         <details class="faq__item" data-reveal>
           <summary>¿Qué archivos puedo subir?</summary>
-          <div class="faq__a"><p>.STL y .3MF, los dos formatos estándar para imprimir. Si tu pieza está en otro formato, escribinos y lo vemos.</p></div>
+          <div class="faq__a"><p>.STL y .3MF, los dos formatos estándar para imprimir. Si son muchos archivos o pesan mucho, podés pegar el link de una carpeta de Google Drive en vez de subirlos. Si tu pieza está en otro formato, escribinos y lo vemos.</p></div>
         </details>
         <details class="faq__item" data-reveal>
           <summary>¿Cómo sé cuántas horas va a llevar mi pieza?</summary>

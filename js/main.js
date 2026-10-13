@@ -206,7 +206,7 @@
      3. Cotizador
   ------------------------------------------------------------------ */
   const form = $("#quoteForm");
-  const state = { printer: null, units: 1, hours: null, material: CFG.MATERIALS[0], brand: null, grams: null, files: [] };
+  const state = { printer: null, units: 1, hours: null, material: CFG.MATERIALS[0], brand: null, grams: null, files: [], drive: null };
 
   const tk = {
     printer: $("#tkPrinter"), rate: $("#tkRate"), units: $("#tkUnits"), hours: $("#tkHours"),
@@ -262,7 +262,7 @@
     setRow(tk.hours, state.hours ? decimal.format(state.hours) + " h" : "A confirmar");
     setRow(tk.material, state.material);
     setRow(tk.brand, state.brand ? state.brand.name + (state.grams ? " · " + integer.format(state.grams) + " g c/u" : "") : "A definir");
-    setRow(tk.files, String(state.files.length));
+    setRow(tk.files, state.drive ? (state.files.length ? state.files.length + " + Drive" : "Link de Drive") : String(state.files.length));
     setRow(tk.print, c.print != null ? fmt(c.print) : "A confirmar");
     setRow(tk.filament, c.filament != null ? fmt(c.filament) : "A confirmar");
 
@@ -290,7 +290,7 @@
   }
 
   /* --- Errores por campo --- */
-  const ERR_TARGET = { printer: null, units: "#units", hours: "#hours", grams: "#grams", files: "#files", name: "#name", email: "#email", phone: "#phone" };
+  const ERR_TARGET = { printer: null, units: "#units", hours: "#hours", grams: "#grams", files: "#files", drive: "#driveUrl", name: "#name", email: "#email", phone: "#phone" };
   function setError(key, msg) {
     const box = $("#err-" + key);
     if (box) box.textContent = msg || "";
@@ -548,6 +548,28 @@
     dropzone.classList.remove("is-over");
     if (e.dataTransfer && e.dataTransfer.files.length) { addFiles(e.dataTransfer.files); pulse($(".drop__ic", dropzone)); }
   });
+  /* --- Google Drive: link a la carpeta, como alternativa a subir el archivo --- */
+  const driveInput = $("#driveUrl");
+  const DRIVE_HOSTS = ["drive.google.com", "docs.google.com"];
+  // quiet = actualiza el estado sin marcar error (mientras todavía están escribiendo)
+  const readDrive = (quiet) => {
+    const raw = driveInput.value.trim();
+    let href = null;
+    if (raw !== "") {
+      try {
+        const url = new URL(/^https?:\/\//i.test(raw) ? raw : "https://" + raw);
+        if (DRIVE_HOSTS.includes(url.hostname.toLowerCase())) href = url.href;
+      } catch (e) { /* no es una URL */ }
+    }
+    state.drive = href;
+    const bad = raw !== "" && !href;
+    if (!quiet || !bad) setError("drive", bad ? "Ese link no es de Google Drive. Tiene que empezar con https://drive.google.com/…" : "");
+    if (href) setError("files", "");
+    return !bad;
+  };
+  driveInput.addEventListener("input", () => { readDrive(!driveInput.hasAttribute("aria-invalid")); updateTicket(); });
+  driveInput.addEventListener("blur", () => { readDrive(); updateTicket(); });
+
   // Si sueltan el archivo fuera de la zona, que el navegador no lo abra y pise la página
   ["dragover", "drop"].forEach((ev) => window.addEventListener(ev, (e) => {
     if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files")) e.preventDefault();
@@ -572,7 +594,8 @@
     fail("printer", state.printer ? "" : "Elegí una impresora para continuar.", $('input[name="printer"]'));
     if (!readHours()) first = first || hoursInput;
     if (!readGrams()) first = first || gramsInput;
-    fail("files", state.files.length ? "" : "Subí al menos un archivo .STL o .3MF.", fileInput);
+    if (!readDrive()) first = first || driveInput;
+    fail("files", state.files.length || state.drive || driveInput.value.trim() ? "" : "Subí al menos un archivo .STL o .3MF, o pegá el link de tu carpeta de Google Drive.", fileInput);
     Object.keys(VALIDATORS).forEach((key) => { const input = $("#" + key); fail(key, VALIDATORS[key](input.value), input); });
     return first;
   }
@@ -592,7 +615,8 @@
     lines.push(`• Material: ${state.material}`);
     if (state.brand) lines.push(`• Filamento: ${state.brand.name}, ${state.grams ? integer.format(state.grams) + " g por máquina" : "gramos a confirmar"}`);
     if (state.files.length) lines.push(`• Archivos: ${state.files.map((x) => x.file.name).join(", ")}`);
-    lines.push("Te adjunto el archivo por acá.");
+    if (state.drive) lines.push(`• Carpeta de Google Drive: ${state.drive}`);
+    if (state.files.length) lines.push("Te adjunto el archivo por acá.");
     return lines.join("\n");
   }
 
@@ -646,6 +670,7 @@
     fd.append("estimate_total", c.print != null && c.filament != null ? c.print + c.filament : "");
     fd.append("currency", CFG.CURRENCY);
     ["name", "email", "phone", "notes"].forEach((key) => fd.append(key, $("#" + key).value.trim()));
+    fd.append("drive_url", state.drive || "");
     state.files.forEach((entry) => fd.append("files[]", entry.file, entry.file.name));
     return fd;
   }
@@ -665,7 +690,7 @@
   const sentPanel = $("#sentPanel");
   function showSent() {
     const firstName = $("#name").value.trim().split(/\s+/)[0];
-    $("#sentText").textContent = `Listo, ${firstName}. Ya tenemos tu archivo: lo revisamos y te escribimos a ${$("#email").value.trim()} con las horas y el total.`;
+    $("#sentText").textContent = `Listo, ${firstName}. Ya tenemos tu pedido: revisamos los archivos y te escribimos a ${$("#email").value.trim()} con las horas y el total.`;
     form.hidden = true;
     sentPanel.hidden = false;
     sentPanel.focus({ preventScroll: true });
@@ -682,7 +707,7 @@
 
   function resetForm() {
     form.reset();
-    state.printer = null; state.units = 1; state.hours = null; state.material = CFG.MATERIALS[0]; state.brand = null; state.grams = null; state.files = [];
+    state.printer = null; state.units = 1; state.hours = null; state.material = CFG.MATERIALS[0]; state.brand = null; state.grams = null; state.files = []; state.drive = null;
     $$(".pcard").forEach((card) => {
       card.classList.remove("is-chosen");
       const btn = $(".pcard__btn", card);
@@ -716,7 +741,7 @@
     }
 
     if (!CFG.FORM_ENDPOINT) {
-      setStatus("info", "El envío online todavía no está conectado. Mandanos este pedido por WhatsApp y adjuntá el archivo en el chat.", true);
+      setStatus("info", "El envío online todavía no está conectado. Mandanos este pedido por WhatsApp" + (state.files.length ? " y adjuntá el archivo en el chat." : ": el link de Drive ya va en el mensaje."), true);
       return;
     }
 
