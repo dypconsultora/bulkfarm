@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#100D08">
+
+  <title>BULK PRINT FARM — Alquilá horas de impresión 3D en nuestra granja</title>
+  <meta name="description" content="Granja de impresión 3D en Buenos Aires. Elegí la impresora, cuántas máquinas querés en paralelo y subí tu .STL o .3MF. Tarifa por hora con filamento incluido.">
+  <meta name="author" content="BULK PRINT FARM">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:site_name" content="BULK PRINT FARM">
+  <meta property="og:title" content="BULK PRINT FARM — Tu archivo. Nuestra granja. Pagás por hora.">
+  <meta property="og:description" content="Elegí la impresora, la cantidad de máquinas y subí tu .STL o .3MF. Tarifa por hora con filamento incluido.">
+  <meta property="og:url" content="https://bulkprintfarm.com/">
+  <meta property="og:image" content="https://bulkprintfarm.com/assets/og-bulk.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="canonical" href="https://bulkprintfarm.com/">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <!-- Tema día/noche: se aplica antes de pintar para que no parpadee. Noche es el default. -->
+  <script>(function(){try{if(localStorage.getItem('bpf-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+
+  <!-- Estado inicial de las animaciones: solo si hay movimiento permitido.
+       Si GSAP no llega a cargar, a los 3,5 s se muestra todo igual. -->
+  <script>(function(){var d=document.documentElement;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;d.classList.add('anim');setTimeout(function(){if(!window.__bpfReady)d.classList.remove('anim');},3500);})();</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Spectral:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "BULK PRINT FARM",
+    "url": "https://bulkprintfarm.com/",
+    "image": "https://bulkprintfarm.com/assets/og-bulk.png",
+    "logo": "https://bulkprintfarm.com/assets/img/logo/bulk-mark.png",
+    "description": "Granja de impresión 3D en Buenos Aires. Alquiler de impresoras Bambu Lab por hora, con filamento incluido.",
+    "email": "hola@bulk3dstudio.com",
+    "telephone": "+5491155512480",
+    "address": { "@type": "PostalAddress", "addressLocality": "Buenos Aires", "addressCountry": "AR" },
+    "areaServed": { "@type": "Country", "name": "Argentina" },
+    "sameAs": ["https://instagram.com/bulk3dstudio"]
+  }
+  </script>
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+
+<header class="site-header" id="siteHeader">
+  <div class="container header__inner">
+    <a href="#inicio" class="brand" aria-label="BULK PRINT FARM — inicio">
+      <img class="brand__mark" src="assets/img/logo/bulk-mark.webp" width="640" height="480" alt="BULK">
+      <span class="brand__txt" aria-hidden="true">Print<br>Farm</span>
+    </a>
+
+    <nav class="nav" aria-label="Navegación principal">
+      <ul class="nav__list">
+        <li><a href="#como-funciona" class="nav__link">Cómo funciona</a></li>
+        <li><a href="#impresoras" class="nav__link">Impresoras</a></li>
+        <li><a href="#tarifa" class="nav__link">Tarifa</a></li>
+        <li><a href="#faq" class="nav__link">Preguntas</a></li>
+        <li><a href="#contacto" class="nav__link">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <div class="theme-switch theme-switch--header" role="group" aria-label="Modo día o noche">
+        <button type="button" class="theme-switch__opt" data-theme-set="light" aria-pressed="false" aria-label="Modo día" title="Modo día"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M21.5 12h-2.6M5.1 12H2.5M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8M18.7 18.7l-1.8-1.8M7.1 7.1 5.3 5.3"/></svg><span>Día</span></button>
+        <button type="button" class="theme-switch__opt" data-theme-set="dark" aria-pressed="true" aria-label="Modo noche" title="Modo noche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="miter" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.7 6.7 0 0 0 9.7 9.7z"/></svg><span>Noche</span></button>
+      </div>
+      <a href="#cotizar" class="btn btn--primary btn--sm">Pedí tus horas</a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Abrir menú">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" id="mobileMenu" hidden>
+    <nav aria-label="Navegación móvil">
+      <ul>
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#impresoras">Impresoras</a></li>
+        <li><a href="#tarifa">Tarifa</a></li>
+        <li><a href="#cotizar">Pedí tus horas</a></li>
+        <li><a href="#faq">Preguntas</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+    <div class="mobile-menu__theme">
+      <span class="mobile-menu__k">Modo</span>
+      <div class="theme-switch" role="group" aria-label="Modo día o noche">
+        <button type="button" class="theme-switch__opt" data-theme-set="light" aria-pressed="false" aria-label="Modo día" title="Modo día"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M21.5 12h-2.6M5.1 12H2.5M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8M18.7 18.7l-1.8-1.8M7.1 7.1 5.3 5.3"/></svg><span>Día</span></button>
+        <button type="button" class="theme-switch__opt" data-theme-set="dark" aria-pressed="true" aria-label="Modo noche" title="Modo noche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="miter" aria-hidden="true"><path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.7 6.7 0 0 0 9.7 9.7z"/></svg><span>Noche</span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" id="inicio">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <p class="lab" data-hero="kicker"><span class="lab__dot"></span> Granja de impresión 3D — Buenos Aires</p>
+
+        <h1 class="hero__title">
+          <span class="h-line"><span>Tu archivo.</span></span>
+          <span class="h-line"><span>Nuestra granja.</span></span>
+          <span class="h-line h-line--serif"><span><em class="serif">Pagás por hora.</em></span></span>
+        </h1>
+
+        <p class="hero__lead" data-hero="lead">
+          Elegí la impresora, cuántas máquinas querés en paralelo y subí tu .STL o .3MF.
+          Revisamos el archivo y lo ponemos a imprimir. El filamento ya está incluido en la tarifa.
+        </p>
+
+        <div class="hero__actions" data-hero="cta">
+          <a href="#cotizar" class="btn btn--primary btn--lg">Pedí tus horas
+            <svg class="btn__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a href="#impresoras" class="btn btn--ghost btn--lg">Ver impresoras y tarifas</a>
+        </div>
+
+        <ul class="hero__facts">
+          <li><span class="fact__k" data-from-label>Tarifa</span><span class="fact__v" data-from-price>Por hora</span></li>
+          <li><span class="fact__k">Filamento</span><span class="fact__v">Incluido</span></li>
+          <li><span class="fact__k">Archivos</span><span class="fact__v">.STL · .3MF</span></li>
+          <li><span class="fact__k">Parque</span><span class="fact__v">Bambu Lab</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Cinta de máquinas: decorativa, se arma desde js/config.js -->
+    <div class="conveyor" aria-hidden="true">
+      <div class="lane"><div class="lane__track" data-lane="0"></div></div>
+      <div class="lane"><div class="lane__track" data-lane="1"></div></div>
+      <div class="lane"><div class="lane__track" data-lane="2"></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== CÓMO FUNCIONA ===================== -->
+  <section class="section section--carbon" id="como-funciona">
+    <div class="container">
+      <p class="lab" data-reveal><span class="lab__idx">(01)</span> Cómo funciona</p>
+      <h2 class="display" data-split>Cuatro pasos, <em class="serif">cero vueltas</em></h2>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="step__bar"><i class="step__fill"></i></span>
+          <span class="step__n">01</span>
+          <h3 class="step__title">Elegís la impresora</h3>
+          <p class="step__text">Cada modelo tiene su tarifa por hora. Elegí según el tamaño y el material de tu pieza.</p>
+        </li>
+        <li class="step">
+          <span class="step__bar"><i class="step__fill"></i></span>
+          <span class="step__n">02</span>
+          <h3 class="step__title">Definís cuántas máquinas</h3>
+          <p class="step__text">Una para un prototipo, varias en paralelo para sacar una serie en menos tiempo.</p>
+        </li>
+        <li class="step">
+          <span class="step__bar"><i class="step__fill"></i></span>
+          <span class="step__n">03</span>
+          <h3 class="step__title">Subís tu archivo</h3>
+          <p class="step__text">.STL o .3MF, desde el formulario. Llega directo a nuestro equipo.</p>
+        </li>
+        <li class="step">
+          <span class="step__bar"><i class="step__fill"></i></span>
+          <span class="step__n">04</span>
+          <h3 class="step__title">Revisamos e imprimimos</h3>
+          <p class="step__text">Comprobamos el archivo y su complejidad, te confirmamos horas y total, y lo ponemos en máquina.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== IMPRESORAS ===================== -->
+  <section class="section section--invert" id="impresoras">
+    <div class="container">
+      <p class="lab" data-reveal><span class="lab__idx">(02)</span> Impresoras y tarifas</p>
+      <div class="head-split">
+        <h2 class="display" data-split>Elegí tu <em class="serif">máquina</em></h2>
+        <p class="lead" data-reveal>Parque 100&nbsp;% Bambu Lab. La tarifa es por hora de impresión y por máquina, con el filamento incluido.</p>
+      </div>
+
+      <!-- Tarjetas generadas desde js/config.js -->
+      <div class="catalog" id="catalog"></div>
+      <noscript><p class="noscript">Activá JavaScript para ver las tarifas y usar el cotizador, o escribinos por WhatsApp al +54 9 11 5551-2480.</p></noscript>
+    </div>
+  </section>
+
+  <!-- ===================== TARIFA ===================== -->
+  <section class="section" id="tarifa">
+    <div class="container">
+      <p class="lab" data-reveal><span class="lab__idx">(03)</span> Qué pagás</p>
+      <h2 class="sr-only">Cómo se calcula el total: tarifa por hora, por horas de impresión, por cantidad de máquinas</h2>
+
+      <div class="eq" aria-hidden="true">
+        <div class="eq__term"><span class="eq__mask"><span class="eq__big">Tarifa/h</span></span><span class="eq__cap">según la impresora</span></div>
+        <span class="eq__op"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></span>
+        <div class="eq__term"><span class="eq__mask"><span class="eq__big">Horas</span></span><span class="eq__cap">las que lleve tu pieza</span></div>
+        <span class="eq__op"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></span>
+        <div class="eq__term"><span class="eq__mask"><span class="eq__big">Máquinas</span></span><span class="eq__cap">las que elijas en paralelo</span></div>
+        <span class="eq__op"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><path d="M2 7.5h20M2 16.5h20"/></svg></span>
+        <div class="eq__term eq__term--total"><span class="eq__mask"><span class="eq__big">Total</span></span><span class="eq__cap">con filamento incluido</span><i class="eq__rule"></i></div>
+      </div>
+
+      <div class="incl">
+        <article class="incl__row" data-reveal>
+          <span class="incl__idx">01</span>
+          <h3 class="incl__title">Filamento incluido</h3>
+          <p class="incl__text">El material ya está dentro de la tarifa por hora. No se cobra aparte.</p>
+        </article>
+        <article class="incl__row" data-reveal>
+          <span class="incl__idx">02</span>
+          <h3 class="incl__title">Revisión del archivo</h3>
+          <p class="incl__text">Comprobamos que esté listo para imprimir y evaluamos su complejidad antes de ponerlo en máquina.</p>
+        </article>
+        <article class="incl__row" data-reveal>
+          <span class="incl__idx">03</span>
+          <h3 class="incl__title">Máquinas en paralelo</h3>
+          <p class="incl__text">Sumá impresoras al pedido para repartir una serie y acortar los plazos.</p>
+        </article>
+        <article class="incl__row" data-reveal>
+          <span class="incl__idx">04</span>
+          <h3 class="incl__title">Tus archivos, seguros</h3>
+          <p class="incl__text">Confidencialidad total de tu diseño.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COTIZAR ===================== -->
+  <section class="section section--carbon" id="cotizar">
+    <div class="container">
+      <p class="lab" data-reveal><span class="lab__idx">(04)</span> Pedí tus horas</p>
+      <div class="head-split">
+        <h2 class="display" data-split>Armá tu <em class="serif">pedido</em></h2>
+        <p class="lead" data-reveal>Completá los cuatro bloques. Revisamos el archivo y te confirmamos horas y total antes de imprimir.</p>
+      </div>
+
+      <form class="quote" id="quoteForm" novalidate>
+        <div class="quote__fields">
+
+          <fieldset class="fs">
+            <legend class="fs__legend"><span class="fs__n">01</span><span class="fs__t">Elegí la impresora <span class="req" aria-hidden="true">*</span></span></legend>
+            <div class="pick" id="printerPick"></div>
+            <p class="field__error" id="err-printer" role="alert"></p>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend class="fs__legend"><span class="fs__n">02</span><span class="fs__t">Cantidad y material</span></legend>
+            <div class="fs__grid">
+              <div class="field">
+                <label class="field__label" for="units">Cantidad de impresoras <span class="req" aria-hidden="true">*</span></label>
+                <div class="stepper">
+                  <button type="button" class="stepper__btn" data-step="-1" aria-label="Quitar una impresora">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M5 12h14"/></svg>
+                  </button>
+                  <input class="stepper__input" id="units" name="units" type="number" inputmode="numeric" min="1" max="20" step="1" value="1" required aria-describedby="help-units err-units">
+                  <button type="button" class="stepper__btn" data-step="1" aria-label="Sumar una impresora">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+                  </button>
+                </div>
+                <p class="field__help" id="help-units">Varias máquinas imprimen en paralelo. Sujeto a disponibilidad.</p>
+                <p class="field__error" id="err-units" role="alert"></p>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="hours">Horas por máquina <span class="opt">(opcional)</span></label>
+                <div class="suffix">
+                  <input class="input input--tall" id="hours" name="hours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="Ej: 12" aria-describedby="help-hours err-hours">
+                  <span class="suffix__u" aria-hidden="true">h</span>
+                </div>
+                <p class="field__help" id="help-hours">Si ya laminaste la pieza, poné el tiempo de tu slicer. Si no, lo calculamos nosotros.</p>
+                <p class="field__error" id="err-hours" role="alert"></p>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field__label" id="matLabel">Material</span>
+              <div class="chips" id="materialPick" role="radiogroup" aria-labelledby="matLabel" aria-describedby="help-mat"></div>
+              <p class="field__help" id="help-mat">El filamento está incluido. Los materiales disponibles dependen de la impresora.</p>
+            </div>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend class="fs__legend"><span class="fs__n">03</span><span class="fs__t">Subí tu archivo <span class="req" aria-hidden="true">*</span></span></legend>
+            <label class="drop" id="dropzone" for="files">
+              <input class="sr-only" id="files" type="file" accept=".stl,.3mf" multiple aria-describedby="help-files err-files">
+              <svg class="drop__ic" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true">
+                <path d="M24 31V9M15 18l9-9 9 9"/><path d="M8 30v9h32v-9"/>
+              </svg>
+              <span class="drop__main">Arrastrá tu <b>.STL</b> o <b>.3MF</b> acá</span>
+              <span class="drop__sub">o hacé clic para elegirlo desde tu compu</span>
+            </label>
+            <p class="field__help" id="help-files"></p>
+            <ul class="files" id="fileList"></ul>
+            <p class="field__error" id="err-files" role="alert"></p>
+          </fieldset>
+
+          <fieldset class="fs">
+            <legend class="fs__legend"><span class="fs__n">04</span><span class="fs__t">Tus datos</span></legend>
+            <div class="fs__grid">
+              <div class="field">
+                <label class="field__label" for="name">Nombre <span class="req" aria-hidden="true">*</span></label>
+                <input class="input" id="name" name="name" type="text" autocomplete="name" required aria-describedby="err-name">
+                <p class="field__error" id="err-name" role="alert"></p>
+              </div>
+              <div class="field">
+                <label class="field__label" for="phone">WhatsApp <span class="req" aria-hidden="true">*</span></label>
+                <input class="input" id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="11 5555-5555" required aria-describedby="err-phone">
+                <p class="field__error" id="err-phone" role="alert"></p>
+              </div>
+              <div class="field field--full">
+                <label class="field__label" for="email">Email <span class="req" aria-hidden="true">*</span></label>
+                <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" required aria-describedby="err-email">
+                <p class="field__error" id="err-email" role="alert"></p>
+              </div>
+              <div class="field field--full">
+                <label class="field__label" for="notes">Comentarios <span class="opt">(opcional)</span></label>
+                <textarea class="input input--area" id="notes" name="notes" rows="4" placeholder="Color, cantidad de piezas, plazo, terminación…"></textarea>
+              </div>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="website">No completar este campo</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+          </fieldset>
+        </div>
+
+        <aside class="ticket" aria-label="Resumen del pedido">
+          <div class="ticket__paper">
+            <header class="ticket__head">
+              <span>BULK PRINT FARM</span>
+              <span>Orden de horas</span>
+            </header>
+
+            <dl class="ticket__rows">
+              <div><dt>Impresora</dt><dd id="tkPrinter">—</dd></div>
+              <div><dt>Tarifa</dt><dd id="tkRate">—</dd></div>
+              <div><dt>Máquinas</dt><dd id="tkUnits">× 1</dd></div>
+              <div><dt>Horas c/u</dt><dd id="tkHours">A confirmar</dd></div>
+              <div><dt>Material</dt><dd id="tkMaterial">A definir</dd></div>
+              <div><dt>Archivos</dt><dd id="tkFiles">0</dd></div>
+            </dl>
+
+            <div class="ticket__total">
+              <span class="ticket__label" id="tkLabel">Por hora</span>
+              <span class="ticket__amount" id="tkAmount">—</span>
+              <span class="ticket__sub" id="tkSub">Elegí una impresora para ver la tarifa.</span>
+            </div>
+
+            <p class="ticket__incl">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+              Filamento incluido
+            </p>
+
+            <div class="ticket__status" id="formStatus" role="status" hidden></div>
+
+            <button type="submit" class="btn btn--solid btn--block btn--lg ticket__submit" id="submitBtn">
+              <span class="ticket__submit-label">Enviar pedido</span>
+              <span class="ticket__submit-bar" aria-hidden="true"></span>
+            </button>
+            <p class="ticket__note">El total final se confirma después de revisar tu archivo. Tus datos no se comparten con terceros.</p>
+            <span class="ticket__layers" aria-hidden="true"></span>
+          </div>
+          <p class="sr-only" aria-live="polite" id="ticketLive"></p>
+        </aside>
+      </form>
+
+      <!-- Pantalla de éxito (reemplaza al formulario al enviar) -->
+      <div class="sent" id="sentPanel" hidden tabindex="-1">
+        <svg class="sent__ic" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" aria-hidden="true">
+          <rect x="3" y="3" width="58" height="58"/><path class="sent__check" d="M18 33l10 10 19-21"/>
+        </svg>
+        <h3 class="display display--sm">Pedido <em class="serif">recibido</em></h3>
+        <p class="lead" id="sentText">Ya tenemos tu archivo. Lo revisamos y te escribimos con las horas y el total.</p>
+        <button type="button" class="btn btn--ghost" id="sentReset">Hacer otro pedido</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="section section--invert" id="faq">
+    <div class="container faq">
+      <div class="faq__head">
+        <p class="lab" data-reveal><span class="lab__idx">(05)</span> Preguntas frecuentes</p>
+        <h2 class="display" data-split>Antes de <em class="serif">imprimir</em></h2>
+      </div>
+
+      <div class="faq__list">
+        <details class="faq__item" data-reveal>
+          <summary>¿Qué incluye la tarifa por hora?</summary>
+          <div class="faq__a"><p>El uso de la impresora durante el tiempo de impresión y el filamento. El material no se cobra aparte.</p></div>
+        </details>
+        <details class="faq__item" data-reveal>
+          <summary>¿Qué archivos puedo subir?</summary>
+          <div class="faq__a"><p>.STL y .3MF, los dos formatos estándar para imprimir. Si tu pieza está en otro formato, escribinos y lo vemos.</p></div>
+        </details>
+        <details class="faq__item" data-reveal>
+          <summary>¿Cómo sé cuántas horas va a llevar mi pieza?</summary>
+          <div class="faq__a"><p>Si ya la laminaste en tu slicer, cargá el tiempo estimado en el formulario y vas a ver un total aproximado. Si no, lo calculamos nosotros al revisar el archivo y te confirmamos horas y total antes de imprimir.</p></div>
+        </details>
+        <details class="faq__item" data-reveal>
+          <summary>¿Qué revisan del archivo?</summary>
+          <div class="faq__a"><p>Que esté en condiciones de imprimirse y qué tan compleja es la pieza. Si hay algo para ajustar, te avisamos antes de ponerla en máquina.</p></div>
+        </details>
+        <details class="faq__item" data-reveal>
+          <summary>¿Para qué sirve pedir más de una impresora?</summary>
+          <div class="faq__a"><p>Para imprimir en paralelo: la misma serie repartida en varias máquinas sale en menos tiempo. La tarifa por hora se multiplica por la cantidad de máquinas.</p></div>
+        </details>
+        <details class="faq__item" data-reveal>
+          <summary>¿Qué materiales puedo usar?</summary>
+          <div class="faq__a"><p>PLA, PETG, ABS, ASA y TPU, según la impresora. Las máquinas cerradas (P1S, X1 Carbon, H2S y H2D) son las indicadas para ABS y ASA.</p></div>
+        </details>
+        <details class="faq__item" data-reveal>
+          <summary>¿Dónde están?</summary>
+          <div class="faq__a"><p>Imprimimos en Buenos Aires, Argentina. Escribinos por WhatsApp para coordinar el retiro o el envío de tus piezas.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACTO ===================== -->
+  <section class="section section--orange" id="contacto">
+    <div class="container">
+      <p class="lab" data-reveal><span class="lab__idx">(06)</span> Contacto</p>
+      <h2 class="display display--xl" data-split>¿Preferís <em class="serif">hablarlo?</em></h2>
+
+      <div class="clinks">
+        <a class="clink" data-reveal data-contact="whatsapp" href="https://wa.me/5491155512480" target="_blank" rel="noopener">
+          <span class="clink__k">WhatsApp</span>
+          <span class="clink__v" data-contact-label="whatsapp">+54 9 11 5551-2480</span>
+          <svg class="clink__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+        </a>
+        <a class="clink" data-reveal data-contact="email" href="mailto:hola@bulk3dstudio.com">
+          <span class="clink__k">Email</span>
+          <span class="clink__v" data-contact-label="email">hola@bulk3dstudio.com</span>
+          <svg class="clink__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+        </a>
+        <a class="clink" data-reveal data-contact="instagram" href="https://instagram.com/bulk3dstudio" target="_blank" rel="noopener">
+          <span class="clink__k">Instagram</span>
+          <span class="clink__v" data-contact-label="instagram">@bulk3dstudio</span>
+          <svg class="clink__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg>
+        </a>
+        <div class="clink clink--static" data-reveal>
+          <span class="clink__k">Ubicación</span>
+          <span class="clink__v">Buenos Aires, Argentina</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p class="footer__giant" aria-hidden="true"><span>BULK PRINT FARM</span></p>
+  <div class="container footer__bottom">
+    <p>© 2026 BULK PRINT FARM. Todos los derechos reservados.</p>
+    <p><a href="https://bulk3dstudio.com" target="_blank" rel="noopener">BULK 3D STUDIO ↗</a></p>
+    <p><a href="https://dypconsultora.com" target="_blank" rel="noopener">Design by DyP Consultora</a></p>
+  </div>
+</footer>
+
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script defer src="js/config.js"></script>
+<script defer src="js/main.js"></script>
+</body>
+</html>
